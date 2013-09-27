@@ -19,7 +19,7 @@ ext {
 }
 
 dependencies {
-  compile 'com.yammer.metrics:metrics-core:2.2.0'
+  compile 'com.codahale.metrics:metrics-core:3.0.1'
   compile 'com.newrelic.agent.java:newrelic-api:2.21.4'
 
   compile 'com.google.code.findbugs:jsr305:2.0.1'
