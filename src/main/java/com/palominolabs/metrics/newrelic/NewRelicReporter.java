@@ -12,16 +12,14 @@ import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.NewRelic;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
+@ThreadSafe
 public final class NewRelicReporter extends ScheduledReporter {
-
-    private static final Logger logger = LoggerFactory.getLogger(NewRelicReporter.class);
 
     /**
      * @see ScheduledReporter#ScheduledReporter(MetricRegistry, String, MetricFilter, TimeUnit, TimeUnit)
