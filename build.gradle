@@ -1,0 +1,105 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
+
+group = 'com.palominolabs.metrics'
+version = '1.0.0-SNAPSHOT'
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+
+sourceCompatibility = JavaVersion.VERSION_1_7
+targetCompatibility = JavaVersion.VERSION_1_7
+
+ext {
+  depVersions = [
+      jersey: '1.17.1',
+      slf4j: '1.7.5',
+      jetty: '9.0.5.v20130815',
+      guice: '3.0'
+  ]
+}
+
+dependencies {
+  compile 'com.yammer.metrics:metrics-core:2.2.0'
+  compile 'com.newrelic.agent.java:newrelic-api:2.21.4'
+
+  compile 'com.google.code.findbugs:jsr305:2.0.1'
+  compile 'com.google.guava:guava:15.0'
+
+  compile "org.slf4j:slf4j-api:$depVersions.slf4j"
+  testRuntime "org.slf4j:slf4j-simple:$depVersions.slf4j"
+  testRuntime "org.slf4j:log4j-over-slf4j:$depVersions.slf4j"
+  testRuntime "org.slf4j:jcl-over-slf4j:$depVersions.slf4j"
+  testCompile "org.slf4j:jul-to-slf4j:$depVersions.slf4j"
+
+  testCompile 'junit:junit:4.11'
+}
+
+repositories {
+  mavenCentral()
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+  from sourceSets.main.allJava
+  classifier = 'sources'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+  from javadoc.destinationDir
+  classifier = 'javadoc'
+}
+
+artifacts {
+  // register in 'archives' config so they will be signed
+  archives sourcesJar
+  archives javadocJar
+}
+
+signing {
+  required { gradle.taskGraph.hasTask("uploadArchives") }
+  sign configurations.archives
+}
+
+// Set sonatypeUsername and sonatypePassword in your ~/.gradle/gradle.properties to be able to use this.
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { deployment -> signing.signPom(deployment) }
+
+      repository(url: isReleaseVersion ?
+        "https://oss.sonatype.org/service/local/staging/deploy/maven2/" :
+        "https://oss.sonatype.org/content/repositories/snapshots/") {
+        def u = project.hasProperty('sonatypeUsername') ? sonatypeUsername : 'FIXME'
+        def p = project.hasProperty('sonatypePassword') ? sonatypePassword : 'FIXME'
+        authentication(userName: u, password: p)
+      }
+
+      pom.project {
+        name 'metrics-new-relic'
+        packaging 'jar'
+        description 'Metrics reporter for New relic'
+        url 'https://github.com/palominolabs/metrics-new-relic'
+
+        scm {
+          url 'scm:git@github.com:palominolabs/metrics-new-relic.git'
+          connection 'scm:git@github.com:palominolabs/metrics-new-relic.git'
+          developerConnection 'scm:git@github.com:palominolabs/metrics-new-relic.git'
+        }
+
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution 'repo'
+          }
+        }
+
+        developers {
+          developer {
+            id 'marshallpierce'
+            name 'Marshall Pierce'
+          }
+        }
+      }
+    }
+  }
+}
