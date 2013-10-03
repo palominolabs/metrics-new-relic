@@ -37,7 +37,7 @@ public final class NewRelicReporter extends ScheduledReporter {
         }
 
         for (Map.Entry<String, Counter> counterEntry : counters.entrySet()) {
-            NewRelic.recordMetric(counterEntry.getKey() + ".count", counterEntry.getValue().getCount());
+            recordCustomMetric(counterEntry.getKey() + ".count", counterEntry.getValue().getCount());
         }
 
         for (Map.Entry<String, Histogram> histogramEntry : histograms.entrySet()) {
@@ -52,21 +52,21 @@ public final class NewRelicReporter extends ScheduledReporter {
             doMetered(timerEntry.getKey(), timerEntry.getValue());
             doSampling(timerEntry.getKey(), timerEntry.getValue());
 
-            NewRelic.recordMetric(timerEntry.getKey() + ".mean", (float) timerEntry.getValue().getMeanRate());
+            recordCustomMetric(timerEntry.getKey() + ".mean", (float) timerEntry.getValue().getMeanRate());
         }
     }
 
     private void doMetered(String name, Metered meter) {
-        NewRelic.recordMetric(name + ".count", meter.getCount());
-        NewRelic.recordMetric(name + ".meanRate", (float) meter.getMeanRate());
-        NewRelic.recordMetric(name + ".1MinuteRate", (float) meter.getOneMinuteRate());
+        recordCustomMetric(name + ".count", meter.getCount());
+        recordCustomMetric(name + ".meanRate", (float) meter.getMeanRate());
+        recordCustomMetric(name + ".1MinuteRate", (float) meter.getOneMinuteRate());
     }
 
     private void doSampling(String name, Sampling sampling) {
         Snapshot snapshot = sampling.getSnapshot();
-        NewRelic.recordMetric(name + ".median", (float) snapshot.getMedian());
-        NewRelic.recordMetric(name + ".75th", (float) snapshot.get75thPercentile());
-        NewRelic.recordMetric(name + ".99th", (float) snapshot.get99thPercentile());
+        recordCustomMetric(name + ".median", (float) snapshot.getMedian());
+        recordCustomMetric(name + ".75th", (float) snapshot.get75thPercentile());
+        recordCustomMetric(name + ".99th", (float) snapshot.get99thPercentile());
     }
 
     private void doGauge(String name, Gauge gauge) {
@@ -75,8 +75,12 @@ public final class NewRelicReporter extends ScheduledReporter {
         if (gaugeValue instanceof Number) {
             float n = ((Number) gaugeValue).floatValue();
             if (!Float.isNaN(n) && !Float.isInfinite(n)) {
-                NewRelic.recordMetric(name, n);
+                recordCustomMetric(name, n);
             }
         }
+    }
+
+    private void recordCustomMetric(String name, float value) {
+        NewRelic.recordMetric("Custom/" + name, value);
     }
 }
