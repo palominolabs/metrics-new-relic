@@ -7,7 +7,6 @@ import com.codahale.metrics.Meter;
 import com.codahale.metrics.Metered;
 import com.codahale.metrics.MetricFilter;
 import com.codahale.metrics.MetricRegistry;
-import com.codahale.metrics.Sampling;
 import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
@@ -18,6 +17,9 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A reporter for metrics that writes to New Relic.
+ */
 @ThreadSafe
 public final class NewRelicReporter extends ScheduledReporter {
 
@@ -37,11 +39,14 @@ public final class NewRelicReporter extends ScheduledReporter {
         }
 
         for (Map.Entry<String, Counter> counterEntry : counters.entrySet()) {
-            recordCustomMetric(counterEntry.getKey() + ".count", counterEntry.getValue().getCount());
+            record(counterEntry.getKey() + "/count", counterEntry.getValue().getCount());
         }
 
         for (Map.Entry<String, Histogram> histogramEntry : histograms.entrySet()) {
-            doSampling(histogramEntry.getKey(), histogramEntry.getValue());
+            String name = histogramEntry.getKey();
+            Snapshot snapshot = histogramEntry.getValue().getSnapshot();
+
+            doSnapshot(name, snapshot, "");
         }
 
         for (Map.Entry<String, Meter> meterEntry : meters.entrySet()) {
@@ -49,24 +54,35 @@ public final class NewRelicReporter extends ScheduledReporter {
         }
 
         for (Map.Entry<String, Timer> timerEntry : timers.entrySet()) {
-            doMetered(timerEntry.getKey(), timerEntry.getValue());
-            doSampling(timerEntry.getKey(), timerEntry.getValue());
+            Timer timer = timerEntry.getValue();
+            String name = "/timer/" + timerEntry.getKey();
+            Snapshot snapshot = timer.getSnapshot();
 
-            recordCustomMetric(timerEntry.getKey() + ".mean", (float) timerEntry.getValue().getMeanRate());
+            doMetered(timerEntry.getKey(), timer);
+
+            doSnapshot(name, snapshot, "/" + getDurationUnit());
         }
     }
 
-    private void doMetered(String name, Metered meter) {
-        recordCustomMetric(name + ".count", meter.getCount());
-        recordCustomMetric(name + ".meanRate", (float) meter.getMeanRate());
-        recordCustomMetric(name + ".1MinuteRate", (float) meter.getOneMinuteRate());
+    private void doSnapshot(String name, Snapshot snapshot, String nameSuffix) {
+        record(name + "/min" + nameSuffix, (float) convertDuration(snapshot.getMin()));
+        record(name + "/max" + nameSuffix, (float) convertDuration(snapshot.getMax()));
+        record(name + "/mean" + nameSuffix, (float) convertDuration(snapshot.getMean()));
+        record(name + "/stdDev" + nameSuffix, (float) convertDuration(snapshot.getStdDev()));
+        record(name + "/median" + nameSuffix, (float) convertDuration(snapshot.getMedian()));
+        record(name + "/75th" + nameSuffix, (float) convertDuration(snapshot.get75thPercentile()));
+        record(name + "/95th" + nameSuffix, (float) convertDuration(snapshot.get95thPercentile()));
+        record(name + "/98th" + nameSuffix, (float) convertDuration(snapshot.get98thPercentile()));
+        record(name + "/99th" + nameSuffix, (float) convertDuration(snapshot.get99thPercentile()));
+        record(name + "/99.9th" + nameSuffix, (float) convertDuration(snapshot.get999thPercentile()));
     }
 
-    private void doSampling(String name, Sampling sampling) {
-        Snapshot snapshot = sampling.getSnapshot();
-        recordCustomMetric(name + ".median", (float) snapshot.getMedian());
-        recordCustomMetric(name + ".75th", (float) snapshot.get75thPercentile());
-        recordCustomMetric(name + ".99th", (float) snapshot.get99thPercentile());
+    private void doMetered(String name, Metered meter) {
+        record(name + "/count", meter.getCount());
+        record(name + "/meanRate/" + getRateUnit(), (float) convertRate(meter.getMeanRate()));
+        record(name + "/1MinuteRate/" + getRateUnit(), (float) convertRate(meter.getOneMinuteRate()));
+        record(name + "/5MinuteRate/" + getRateUnit(), (float) convertRate(meter.getFiveMinuteRate()));
+        record(name + "/15MinuteRate/" + getRateUnit(), (float) convertRate(meter.getFifteenMinuteRate()));
     }
 
     private void doGauge(String name, Gauge gauge) {
@@ -75,12 +91,12 @@ public final class NewRelicReporter extends ScheduledReporter {
         if (gaugeValue instanceof Number) {
             float n = ((Number) gaugeValue).floatValue();
             if (!Float.isNaN(n) && !Float.isInfinite(n)) {
-                recordCustomMetric(name, n);
+                record(name, n);
             }
         }
     }
 
-    private void recordCustomMetric(String name, float value) {
+    private void record(String name, float value) {
         NewRelic.recordMetric("Custom/" + name, value);
     }
 }
