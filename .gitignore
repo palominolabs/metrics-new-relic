@@ -10,4 +10,4 @@
 build
 target
 out
-newrelic
+/newrelic
