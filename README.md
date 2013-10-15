@@ -13,7 +13,7 @@ NewRelicReporter reporter =
 reporter.start(1, TimeUnit.MINUTES);
 ```
 
-This will report all attributes of all metrics to New Relic using seconds as the rate unit and milliseconds as the duration unit.
+This will report all attributes of all metrics to New Relic using seconds as the rate unit and milliseconds as the duration unit. Data will be reported via the New Relic Java API once a minute.
 
 ## Custom metrics in New Relic
 
@@ -42,8 +42,8 @@ You can also specify a non-empty metric name prefix if you wish to further segre
 
 ## Limiting what's reported to New Relic
 
-According to [New Relic's Best Practices](https://docs.newrelic.com/docs/features/custom-metric-collection#best_practices), they want to keep the number of custom metrics under 2000 or so. Since each Timer might generate a dozen custom metrics in New Relic, it's pretty easy to hit this limit.
+According to [New Relic's custom metric best practices](https://docs.newrelic.com/docs/features/custom-metric-collection#best_practices), they want to keep the number of custom metrics under 2000 or so. Since each Timer might generate a dozen custom metrics in New Relic, it's pretty easy to hit this limit.
 
 There are two ways you can keep the number of custom metrics under control. To choose which specific metrics to report on, use a [MetricFilter](https://github.com/codahale/metrics/blob/master/metrics-core/src/main/java/com/codahale/metrics/MetricFilter.java). If you want to report on all metrics, use `MetricFilter.ALL`; otherwise, provide your own implementation of `MetricFilter`.
 
-To limit which attributes of each metric will be reported to New Relic, [MetricAttributeFilter](https://github.com/palominolabs/metrics-new-relic/blob/master/src/main/java/com/palominolabs/metrics/newrelic/MetricAttributeFilter.java) has boolean methods for every attribute, such as `boolean recordTimerMedian(String name, Timer metric)`. All such method will be passed the metric name and the metric object itself for arbitration on whether or not the relevant attribute will be reported. For convenient implementation of both whitelist and blacklist approaches, [AllEnabledMetricAttributeFilter](https://github.com/palominolabs/metrics-new-relic/blob/master/src/main/java/com/palominolabs/metrics/newrelic/AllEnabledMetricAttributeFilter.java) and [AllDisabledMetricAttributeFilter](https://github.com/palominolabs/metrics-new-relic/blob/master/src/main/java/com/palominolabs/metrics/newrelic/AllDisabledMetricAttributeFilter.java) are provided.
+To limit which attributes of each metric will be reported to New Relic, [MetricAttributeFilter](https://github.com/palominolabs/metrics-new-relic/blob/master/src/main/java/com/palominolabs/metrics/newrelic/MetricAttributeFilter.java) has boolean methods for every attribute, such as `boolean recordTimerMedian(String name, Timer metric)`. All such methods will be passed the metric name and the metric object itself for arbitration on whether or not the relevant attribute will be reported. For convenient implementation of both whitelist and blacklist approaches, [AllEnabledMetricAttributeFilter](https://github.com/palominolabs/metrics-new-relic/blob/master/src/main/java/com/palominolabs/metrics/newrelic/AllEnabledMetricAttributeFilter.java) and [AllDisabledMetricAttributeFilter](https://github.com/palominolabs/metrics-new-relic/blob/master/src/main/java/com/palominolabs/metrics/newrelic/AllDisabledMetricAttributeFilter.java) are provided.
