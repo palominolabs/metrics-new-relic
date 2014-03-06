@@ -6,7 +6,7 @@ group = 'com.palominolabs.metrics'
 version = '1.0.1-SNAPSHOT'
 ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
-sourceCompatibility = JavaVersion.VERSION_1_7
+sourceCompatibility = JavaVersion.VERSION_1_6
 
 dependencies {
   compile 'com.codahale.metrics:metrics-core:3.0.1'
