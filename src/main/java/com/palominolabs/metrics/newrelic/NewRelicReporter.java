@@ -54,7 +54,6 @@ public final class NewRelicReporter extends ScheduledReporter {
     @Override
     public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters,
         SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters, SortedMap<String, Timer> timers) {
-        System.out.println("--- Reporting");
         for (Map.Entry<String, Gauge> gaugeEntry : gauges.entrySet()) {
             doGauge(gaugeEntry.getKey(), gaugeEntry.getValue());
         }
