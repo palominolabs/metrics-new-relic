@@ -10,7 +10,7 @@ sourceCompatibility = JavaVersion.VERSION_1_6
 
 dependencies {
   compile 'com.codahale.metrics:metrics-core:3.0.2'
-  compile 'com.newrelic.agent.java:newrelic-api:3.5.1'
+  compile 'com.newrelic.agent.java:newrelic-api:3.10.0'
 
   compile 'com.google.code.findbugs:jsr305:2.0.3'
 }
