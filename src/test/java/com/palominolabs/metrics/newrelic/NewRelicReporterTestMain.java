@@ -42,10 +42,15 @@ public class NewRelicReporterTestMain {
 
         final Timer timer = registry.timer(name("timer"));
 
-        NewRelicReporter reporter =
-            new NewRelicReporter(registry, "new relic reporter", MetricFilter.ALL,
-                new AllEnabledMetricAttributeFilter(), TimeUnit.SECONDS, TimeUnit.MILLISECONDS,
-                "foo/");
+        NewRelicReporter reporter = NewRelicReporter.forRegistry(registry)
+                .name("new relic reporter")
+                .filter(MetricFilter.ALL)
+                .attributeFilter(new AllEnabledMetricAttributeFilter())
+                .rateUnit(TimeUnit.SECONDS)
+                .durationUnit(TimeUnit.MILLISECONDS)
+                .metricNamePrefix("foo/")
+                .build();
+
         reporter.start(60, TimeUnit.SECONDS);
 
         ScheduledExecutorService svc = Executors.newScheduledThreadPool(1);

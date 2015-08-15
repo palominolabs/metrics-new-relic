@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
  * A reporter for Metrics that writes to New Relic as "custom metrics".
  *
  * New Relic wants to keep custom metrics to a total of about 2000, but 2000 custom metrics can easily be reached when
- * every {@link com.codahale.metrics.Timer} can produce 15 New Relic metrics. See https://docs.newrelic.com/docs/features/custom-metric-collection
+ * every {@link Timer} can produce 15 New Relic metrics. See https://docs.newrelic.com/docs/features/custom-metric-collection
  * for more.
  *
  * To keep the number of custom metrics under control, provide appropriate implementations of {@link MetricFilter} and
@@ -34,6 +34,17 @@ public final class NewRelicReporter extends ScheduledReporter {
     private final String metricNamePrefix;
 
     /**
+     * Returns a new {@link Builder} for {@link NewRelicReporter}.
+     *
+     * @param registry the registry to report
+     * @return a {@link Builder} instance for a {@link NewRelicReporter}
+     */
+    public static NewRelicReporter.Builder forRegistry(MetricRegistry registry) {
+        return new NewRelicReporter.Builder(registry);
+    }
+
+
+    /**
      * @param registry         metric registry to get metrics from
      * @param name             reporter name
      * @param filter           metric filter
@@ -44,12 +55,13 @@ public final class NewRelicReporter extends ScheduledReporter {
      *                         needed.
      * @see ScheduledReporter#ScheduledReporter(MetricRegistry, String, MetricFilter, TimeUnit, TimeUnit)
      */
-    public NewRelicReporter(MetricRegistry registry, String name, MetricFilter filter,
+    private NewRelicReporter(MetricRegistry registry, String name, MetricFilter filter,
         MetricAttributeFilter attributeFilter, TimeUnit rateUnit, TimeUnit durationUnit, String metricNamePrefix) {
         super(registry, name, filter, rateUnit, durationUnit);
         this.attributeFilter = attributeFilter;
         this.metricNamePrefix = metricNamePrefix;
     }
+
 
     @Override
     public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters,
@@ -207,5 +219,79 @@ public final class NewRelicReporter extends ScheduledReporter {
 
     private void record(String name, float value) {
         NewRelic.recordMetric("Custom/" + metricNamePrefix + name, value);
+    }
+
+
+    public static final class Builder {
+        private MetricRegistry registry;
+        private String name;
+        private MetricFilter filter;
+        private MetricAttributeFilter attributeFilter;
+        private TimeUnit rateUnit;
+        private TimeUnit durationUnit;
+        private String metricNamePrefix;
+
+        public Builder(MetricRegistry registry) {
+            this.registry = registry;
+            this.rateUnit = TimeUnit.SECONDS;
+            this.durationUnit = TimeUnit.MILLISECONDS;
+            this.metricNamePrefix = "";
+            this.name = "new relic reporter";
+            this.filter = MetricFilter.ALL;
+            this.attributeFilter = new AllEnabledMetricAttributeFilter();
+        }
+
+        /**
+         * @param attributeFilter metric attribute filter
+         */
+        public Builder attributeFilter(MetricAttributeFilter attributeFilter) {
+            this.attributeFilter = attributeFilter;
+            return this;
+        }
+
+        /**
+         * @param name reporter name
+         */
+        public Builder name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        /**
+         * @param filter metric filter
+         */
+        public Builder filter(MetricFilter filter) {
+            this.filter = filter;
+            return this;
+        }
+
+        /**
+         * @param rateUnit unit for reporting rates
+         */
+        public Builder rateUnit(TimeUnit rateUnit) {
+            this.rateUnit = rateUnit;
+            return this;
+        }
+
+        /**
+         * @param durationUnit unit for reporting durations
+         */
+        public Builder durationUnit(TimeUnit durationUnit) {
+            this.durationUnit = durationUnit;
+            return this;
+        }
+
+        /**
+         * @param metricNamePrefix prefix before the metric name used when naming New Relic metrics. Use "" if no prefix is
+         *                         needed.
+         */
+        public Builder metricNamePrefix(String metricNamePrefix) {
+            this.metricNamePrefix = metricNamePrefix;
+            return this;
+        }
+
+        public NewRelicReporter build() {
+            return new NewRelicReporter(registry, name, filter, attributeFilter, rateUnit, durationUnit, metricNamePrefix);
+        }
     }
 }
