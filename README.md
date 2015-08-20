@@ -6,10 +6,15 @@ Each of the main types of Metrics (Gauges, Counters, Histograms, Meters, Timers)
 
 To upload all metrics in your `MetricRegistry` with all available data (not filtering at all), this will do:
 ```
-NewRelicReporter reporter =
-        new NewRelicReporter(registry, "new relic reporter", MetricFilter.ALL,
-            new AllEnabledMetricAttributeFilter(), TimeUnit.SECONDS, TimeUnit.MILLISECONDS,
-            "");
+NewRelicReporter reporter = NewRelicReporter.forRegistry(registry)
+                .name("new relic reporter")
+                .filter(MetricFilter.ALL)
+                .attributeFilter(new AllEnabledMetricAttributeFilter())
+                .rateUnit(TimeUnit.SECONDS)
+                .durationUnit(TimeUnit.MILLISECONDS)
+                .metricNamePrefix("foo/")
+                .build();
+
 reporter.start(1, TimeUnit.MINUTES);
 ```
 
