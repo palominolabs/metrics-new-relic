@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 
 /**
  * Convenience implementation of {@link MetricAttributeFilter} with grain level customization.
- * <p/>
+ *
  * For example:
  * <pre>
  *     {@code

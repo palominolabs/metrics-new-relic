@@ -18,6 +18,7 @@ import java.util.Map;
 
 /**
  * Supplier of a {@link Table} created by reading a yaml file defined as follows:
+ *
  * <pre>
  *     metricName1:
  *          TIMER_MAX: true
@@ -25,7 +26,6 @@ import java.util.Map;
  *     metricName2:
  *          COUNTER_COUNT: true
  * </pre>
- * <p/>
  */
 public class YamlMetricsAttributeTableSupplier implements Supplier<Table<String, NewRelicMetric, Boolean>> {
 

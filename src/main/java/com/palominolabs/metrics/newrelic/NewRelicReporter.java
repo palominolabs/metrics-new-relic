@@ -10,11 +10,10 @@ import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.NewRelic;
-
-import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * A reporter for Metrics that writes to New Relic as "custom metrics".
@@ -43,7 +42,6 @@ public final class NewRelicReporter extends ScheduledReporter {
         return new NewRelicReporter.Builder(registry);
     }
 
-
     /**
      * @param registry         metric registry to get metrics from
      * @param name             reporter name
@@ -61,7 +59,6 @@ public final class NewRelicReporter extends ScheduledReporter {
         this.attributeFilter = attributeFilter;
         this.metricNamePrefix = metricNamePrefix;
     }
-
 
     @Override
     public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters,
@@ -140,34 +137,34 @@ public final class NewRelicReporter extends ScheduledReporter {
 
     private void doHistogramSnapshot(String name, Snapshot snapshot, Histogram metric) {
         if (attributeFilter.recordHistogramMin(name, metric)) {
-            record(name + "/min" , (float) convertDuration(snapshot.getMin()));
+            record(name + "/min", (float) convertDuration(snapshot.getMin()));
         }
         if (attributeFilter.recordHistogramMax(name, metric)) {
-            record(name + "/max" , (float) convertDuration(snapshot.getMax()));
+            record(name + "/max", (float) convertDuration(snapshot.getMax()));
         }
         if (attributeFilter.recordHistogramMean(name, metric)) {
-            record(name + "/mean" , (float) convertDuration(snapshot.getMean()));
+            record(name + "/mean", (float) convertDuration(snapshot.getMean()));
         }
         if (attributeFilter.recordHistogramStdDev(name, metric)) {
-            record(name + "/stdDev" , (float) convertDuration(snapshot.getStdDev()));
+            record(name + "/stdDev", (float) convertDuration(snapshot.getStdDev()));
         }
         if (attributeFilter.recordHistogramMedian(name, metric)) {
-            record(name + "/median" , (float) convertDuration(snapshot.getMedian()));
+            record(name + "/median", (float) convertDuration(snapshot.getMedian()));
         }
         if (attributeFilter.recordHistogram75thPercentile(name, metric)) {
-            record(name + "/75th" , (float) convertDuration(snapshot.get75thPercentile()));
+            record(name + "/75th", (float) convertDuration(snapshot.get75thPercentile()));
         }
         if (attributeFilter.recordHistogram95thPercentile(name, metric)) {
-            record(name + "/95th" , (float) convertDuration(snapshot.get95thPercentile()));
+            record(name + "/95th", (float) convertDuration(snapshot.get95thPercentile()));
         }
         if (attributeFilter.recordHistogram98thPercentile(name, metric)) {
-            record(name + "/98th" , (float) convertDuration(snapshot.get98thPercentile()));
+            record(name + "/98th", (float) convertDuration(snapshot.get98thPercentile()));
         }
         if (attributeFilter.recordHistogram99thPercentile(name, metric)) {
-            record(name + "/99th" , (float) convertDuration(snapshot.get99thPercentile()));
+            record(name + "/99th", (float) convertDuration(snapshot.get99thPercentile()));
         }
         if (attributeFilter.recordHistogram999thPercentile(name, metric)) {
-            record(name + "/99.9th" , (float) convertDuration(snapshot.get999thPercentile()));
+            record(name + "/99.9th", (float) convertDuration(snapshot.get999thPercentile()));
         }
     }
 
@@ -221,7 +218,6 @@ public final class NewRelicReporter extends ScheduledReporter {
         NewRelic.recordMetric("Custom/" + metricNamePrefix + name, value);
     }
 
-
     public static final class Builder {
         private MetricRegistry registry;
         private String name;
@@ -243,6 +239,7 @@ public final class NewRelicReporter extends ScheduledReporter {
 
         /**
          * @param attributeFilter metric attribute filter
+         * @return this
          */
         public Builder attributeFilter(MetricAttributeFilter attributeFilter) {
             this.attributeFilter = attributeFilter;
@@ -251,6 +248,7 @@ public final class NewRelicReporter extends ScheduledReporter {
 
         /**
          * @param name reporter name
+         * @return this
          */
         public Builder name(String name) {
             this.name = name;
@@ -259,6 +257,7 @@ public final class NewRelicReporter extends ScheduledReporter {
 
         /**
          * @param filter metric filter
+         * @return this
          */
         public Builder filter(MetricFilter filter) {
             this.filter = filter;
@@ -267,6 +266,7 @@ public final class NewRelicReporter extends ScheduledReporter {
 
         /**
          * @param rateUnit unit for reporting rates
+         * @return this
          */
         public Builder rateUnit(TimeUnit rateUnit) {
             this.rateUnit = rateUnit;
@@ -275,6 +275,7 @@ public final class NewRelicReporter extends ScheduledReporter {
 
         /**
          * @param durationUnit unit for reporting durations
+         * @return this
          */
         public Builder durationUnit(TimeUnit durationUnit) {
             this.durationUnit = durationUnit;
@@ -282,8 +283,9 @@ public final class NewRelicReporter extends ScheduledReporter {
         }
 
         /**
-         * @param metricNamePrefix prefix before the metric name used when naming New Relic metrics. Use "" if no prefix is
-         *                         needed.
+         * @param metricNamePrefix prefix before the metric name used when naming New Relic metrics. Use "" if no prefix
+         *                         is needed.
+         * @return this
          */
         public Builder metricNamePrefix(String metricNamePrefix) {
             this.metricNamePrefix = metricNamePrefix;
@@ -291,7 +293,8 @@ public final class NewRelicReporter extends ScheduledReporter {
         }
 
         public NewRelicReporter build() {
-            return new NewRelicReporter(registry, name, filter, attributeFilter, rateUnit, durationUnit, metricNamePrefix);
+            return new NewRelicReporter(registry, name, filter, attributeFilter, rateUnit, durationUnit,
+                metricNamePrefix);
         }
     }
 }
