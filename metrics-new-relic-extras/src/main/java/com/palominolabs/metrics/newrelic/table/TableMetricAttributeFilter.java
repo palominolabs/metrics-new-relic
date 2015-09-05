@@ -50,6 +50,13 @@ public class TableMetricAttributeFilter implements MetricAttributeFilter {
         this.fallback = getFallbackMetricFilter(fallback);
     }
 
+    /*
+     * This approach has some reduction in duplication of logic surrounding the fallback, but it also means that
+     * an allocation happens for each record call. If this proves to be a problem, could inline all the
+     * Supplier<Boolean> instances. Reporting isn't a very hot code path though, and these allocations should all die
+     * in newgen, so it's probably not a big issue.
+     */
+
     @Override
     public boolean recordTimerMin(final String name, final Timer metric) {
         return isEnabledWithFallback(name, NewRelicMetric.TIMER_MIN, new Supplier<Boolean>() {
