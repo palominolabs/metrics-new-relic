@@ -6,7 +6,8 @@ subprojects {
   group = 'com.palominolabs.metrics'
   version = '1.0.6-SNAPSHOT'
   ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
-  ext.deps = [jackson: '2.6.1']
+  ext.deps = [jackson: '2.6.1',
+              junit  : '4.12']
 
   sourceCompatibility = JavaVersion.VERSION_1_6
 

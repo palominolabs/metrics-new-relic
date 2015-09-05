@@ -3,7 +3,7 @@ dependencies {
   compile 'com.newrelic.agent.java:newrelic-api:3.10.0'
   compile 'com.google.guava:guava:18.0'
   compile 'com.google.code.findbugs:jsr305:2.0.3'
-  testCompile 'junit:junit:4.12'
+  testCompile "junit:junit:${deps.junit}"
 }
 
 // Set sonatypeUsername and sonatypePassword in your ~/.gradle/gradle.properties to be able to use this.
