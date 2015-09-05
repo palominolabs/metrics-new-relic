@@ -1,0 +1,52 @@
+dependencies {
+  compile 'io.dropwizard.metrics:metrics-core:3.1.0'
+  compile 'com.newrelic.agent.java:newrelic-api:3.10.0'
+  compile 'com.google.guava:guava:18.0'
+  compile 'com.google.code.findbugs:jsr305:2.0.3'
+  testCompile "junit:junit:${deps.junit}"
+}
+
+// Set sonatypeUsername and sonatypePassword in your ~/.gradle/gradle.properties to be able to use this.
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { deployment -> signing.signPom(deployment) }
+
+      repository(url: isReleaseVersion ?
+          "https://oss.sonatype.org/service/local/staging/deploy/maven2/" :
+          "https://oss.sonatype.org/content/repositories/snapshots/") {
+        def u = project.hasProperty('sonatypeUsername') ? sonatypeUsername : 'FIXME'
+        def p = project.hasProperty('sonatypePassword') ? sonatypePassword : 'FIXME'
+        authentication(userName: u, password: p)
+      }
+
+      pom.project {
+        name 'metrics-new-relic'
+        packaging 'jar'
+        description 'Metrics reporter for New relic'
+        url 'https://github.com/palominolabs/metrics-new-relic'
+
+        scm {
+          url 'scm:git@github.com:palominolabs/metrics-new-relic.git'
+          connection 'scm:git@github.com:palominolabs/metrics-new-relic.git'
+          developerConnection 'scm:git@github.com:palominolabs/metrics-new-relic.git'
+        }
+
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            distribution 'repo'
+          }
+        }
+
+        developers {
+          developer {
+            id 'marshallpierce'
+            name 'Marshall Pierce'
+          }
+        }
+      }
+    }
+  }
+}

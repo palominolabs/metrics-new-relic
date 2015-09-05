@@ -1,1 +1,4 @@
-rootProject.name = 'metrics-new-relic'
+rootProject.name = 'metrics-new-relic-root'
+
+include 'metrics-new-relic',
+    'metrics-new-relic-extras'

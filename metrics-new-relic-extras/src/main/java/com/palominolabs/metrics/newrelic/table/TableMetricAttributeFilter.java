@@ -1,4 +1,4 @@
-package com.palominolabs.metrics.newrelic;
+package com.palominolabs.metrics.newrelic.table;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
@@ -9,13 +9,15 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Table;
-
+import com.palominolabs.metrics.newrelic.AllDisabledMetricAttributeFilter;
+import com.palominolabs.metrics.newrelic.MetricAttributeFilter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * Convenience implementation of {@link MetricAttributeFilter} with grain level customization.
- * <p/>
+ *
  * For example:
  * <pre>
  *     {@code
@@ -25,36 +27,37 @@ import javax.annotation.Nullable;
  *          .put("metricName2", NewRelicMetric.COUNTER_COUNT, true)
  *          .build();
  *
- *      new TableMetricAttributeFilter(new MetricAttributeTableSupplier(metricConfig), new AllDisabledMetricAttributeFilter());
+ *      new TableMetricAttributeFilter(new MetricAttributeTableSupplier(metricConfig), new
+ * AllDisabledMetricAttributeFilter());
  *     }
  * </pre>
- * Constructor receives a {@link MetricAttributeFilter} which will be used as fallback for all metrics not specified in configuration.
- * In case <i>fallback</i> is null, {@link AllDisabledMetricAttributeFilter} will be used.
+ * Constructor receives a {@link MetricAttributeFilter} which will be used as fallback for all metrics not specified in
+ * configuration. In case <i>fallback</i> is null, {@link AllDisabledMetricAttributeFilter} will be used.
  */
+@ThreadSafe
 public class TableMetricAttributeFilter implements MetricAttributeFilter {
 
-    final private Table<String, NewRelicMetric, Boolean> enabledMetrics;
-    final private MetricAttributeFilter fallback;
+    private final Table<String, NewRelicMetric, Boolean> enabledMetrics;
+    private final MetricAttributeFilter fallback;
 
     /**
-     * @param tableSupplier supplier of a table containing metrics config
-     * @param fallback      to be used when there metrics config has no entry for the metric to be reported
+     * @param table    table containing metrics config. Must be immutable or otherwise threadsafe.
+     * @param fallback to be used when there metrics config has no entry for the metric to be reported. If null,
+     *                 AllDisabledMetricAttributeFilter will be used.
      */
-    public TableMetricAttributeFilter(@Nonnull Supplier<Table<String, NewRelicMetric, Boolean>> tableSupplier, @Nullable MetricAttributeFilter fallback) {
-        Preconditions.checkArgument(tableSupplier != null, "tableSupplier cannot be null");
-        this.enabledMetrics = tableSupplier.get();
+    public TableMetricAttributeFilter(@Nonnull Table<String, NewRelicMetric, Boolean> table,
+            @Nullable MetricAttributeFilter fallback) {
+        Preconditions.checkArgument(table != null, "table cannot be null");
+        this.enabledMetrics = table;
         this.fallback = getFallbackMetricFilter(fallback);
     }
 
-    private MetricAttributeFilter getFallbackMetricFilter(MetricAttributeFilter fallback) {
-        return fallback == null ?
-                new AllDisabledMetricAttributeFilter() :
-                fallback;
-    }
-
-    private boolean isEnabledWithFallback(final String name, NewRelicMetric newRelicMetric, Supplier<Boolean> fallbackSupplier) {
-        return Optional.fromNullable(enabledMetrics.get(name, newRelicMetric)).or(fallbackSupplier);
-    }
+    /*
+     * This approach has some reduction in duplication of logic surrounding the fallback, but it also means that
+     * an allocation happens for each record call. If this proves to be a problem, could inline all the
+     * Supplier<Boolean> instances. Reporting isn't a very hot code path though, and these allocations should all die
+     * in newgen, so it's probably not a big issue.
+     */
 
     @Override
     public boolean recordTimerMin(final String name, final Timer metric) {
@@ -376,6 +379,17 @@ public class TableMetricAttributeFilter implements MetricAttributeFilter {
         });
     }
 
+    private MetricAttributeFilter getFallbackMetricFilter(MetricAttributeFilter fallback) {
+        return fallback == null ?
+                new AllDisabledMetricAttributeFilter() :
+                fallback;
+    }
+
+    private boolean isEnabledWithFallback(final String name, NewRelicMetric newRelicMetric,
+            Supplier<Boolean> fallbackSupplier) {
+        return Optional.fromNullable(enabledMetrics.get(name, newRelicMetric)).or(fallbackSupplier);
+    }
+
     public enum NewRelicMetric {
 
         TIMER_MIN,
@@ -412,5 +426,4 @@ public class TableMetricAttributeFilter implements MetricAttributeFilter {
         GAUGE_VALUE,
 
     }
-
 }

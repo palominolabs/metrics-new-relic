@@ -1,0 +1,6 @@
+dependencies {
+  compile project(':metrics-new-relic')
+  compile "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:${deps.jackson}"
+  compile "com.fasterxml.jackson.core:jackson-databind:${deps.jackson}"
+  testCompile "junit:junit:${deps.junit}"
+}

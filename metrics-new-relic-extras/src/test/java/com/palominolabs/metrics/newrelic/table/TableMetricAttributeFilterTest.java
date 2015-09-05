@@ -1,12 +1,13 @@
-package com.palominolabs.metrics.newrelic;
+package com.palominolabs.metrics.newrelic.table;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Timer;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
-import com.palominolabs.metrics.newrelic.TableMetricAttributeFilter.NewRelicMetric;
-import org.hamcrest.CoreMatchers;
+import com.palominolabs.metrics.newrelic.AllDisabledMetricAttributeFilter;
+import com.palominolabs.metrics.newrelic.AllEnabledMetricAttributeFilter;
+import com.palominolabs.metrics.newrelic.table.TableMetricAttributeFilter.NewRelicMetric;
+import java.io.IOException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -15,21 +16,21 @@ import static org.hamcrest.MatcherAssert.assertThat;
 
 public class TableMetricAttributeFilterTest {
 
-    private Timer timer = new Timer();
+    private final Timer timer = new Timer();
 
     @Test
     public void metricSetToFalseInConfigFile() throws Exception {
-        TableMetricAttributeFilter instance = new TableMetricAttributeFilter(new YamlMetricsAttributeTableSupplier(
-                TableMetricAttributeFilterTest.class.getResource("/testing-config.yml").toURI()), new AllEnabledMetricAttributeFilter());
+        TableMetricAttributeFilter instance =
+                new TableMetricAttributeFilter(getTable("testing-config.yml"),
+                        new AllEnabledMetricAttributeFilter());
 
         assertThat(instance.recordTimerMin("name2", timer), equalTo(false));
     }
 
     @Test
     public void metricSetToTrueInConfigFile() throws Exception {
-        TableMetricAttributeFilter instance = new TableMetricAttributeFilter(
-                new YamlMetricsAttributeTableSupplier(
-                        TableMetricAttributeFilterTest.class.getResource("/testing-config.yml").toURI()), new AllDisabledMetricAttributeFilter());
+        TableMetricAttributeFilter instance = new TableMetricAttributeFilter(getTable("testing-config.yml"),
+                new AllDisabledMetricAttributeFilter());
 
         assertThat(instance.recordTimerMax("name2", timer), equalTo(true));
         assertThat(instance.recordCounterCount("name1", new Counter()), equalTo(true));
@@ -37,9 +38,8 @@ public class TableMetricAttributeFilterTest {
 
     @Test
     public void metricNotDefinedInConfigFile_useFallback() throws Exception {
-        TableMetricAttributeFilter instance = new TableMetricAttributeFilter(
-                new YamlMetricsAttributeTableSupplier(
-                        TableMetricAttributeFilterTest.class.getResource("/testing-config.yml").toURI()), new AllDisabledMetricAttributeFilter());
+        TableMetricAttributeFilter instance = new TableMetricAttributeFilter(getTable("testing-config.yml"),
+                new AllDisabledMetricAttributeFilter());
 
         assertThat(instance.recordTimer15MinuteRate("name2", timer), equalTo(false));
         assertThat(instance.recordTimerMax("name_notDefined", timer), equalTo(false));
@@ -53,7 +53,8 @@ public class TableMetricAttributeFilterTest {
                 .put("metricName2", NewRelicMetric.COUNTER_COUNT, true)
                 .build();
 
-        TableMetricAttributeFilter instance = new TableMetricAttributeFilter(new MetricsAttributeTableSupplier(metricConfig), null);
+        TableMetricAttributeFilter instance =
+                new TableMetricAttributeFilter(metricConfig, null);
 
         assertThat(instance.recordTimer15MinuteRate("metricName1", timer), equalTo(false));
         assertThat(instance.recordTimerMax("metricName1", timer), equalTo(true));
@@ -66,14 +67,16 @@ public class TableMetricAttributeFilterTest {
     }
 
     @Test
-    public void nullTableSupplier_throwException() {
-        Supplier<Table<String, NewRelicMetric, Boolean>> tableSupplier = null;
+    public void nullTable_throwException() {
         try {
-            new TableMetricAttributeFilter(tableSupplier, new AllEnabledMetricAttributeFilter());
+            new TableMetricAttributeFilter(null, new AllEnabledMetricAttributeFilter());
             Assert.fail();
         } catch (IllegalArgumentException e) {
-            assertThat(e.getMessage(), CoreMatchers.equalTo("tableSupplier cannot be null"));
+            assertThat(e.getMessage(), equalTo("table cannot be null"));
         }
     }
 
+    private Table<String, NewRelicMetric, Boolean> getTable(String resource) throws IOException {
+        return new YamlMetricsAttributeTableLoader().loadTable(getClass().getResourceAsStream(resource));
+    }
 }
