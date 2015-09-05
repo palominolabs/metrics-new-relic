@@ -13,6 +13,7 @@ import com.palominolabs.metrics.newrelic.AllDisabledMetricAttributeFilter;
 import com.palominolabs.metrics.newrelic.MetricAttributeFilter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
 
 /**
  * Convenience implementation of {@link MetricAttributeFilter} with grain level customization.
@@ -33,20 +34,21 @@ import javax.annotation.Nullable;
  * Constructor receives a {@link MetricAttributeFilter} which will be used as fallback for all metrics not specified in
  * configuration. In case <i>fallback</i> is null, {@link AllDisabledMetricAttributeFilter} will be used.
  */
+@ThreadSafe
 public class TableMetricAttributeFilter implements MetricAttributeFilter {
 
-    final private Table<String, NewRelicMetric, Boolean> enabledMetrics;
-    final private MetricAttributeFilter fallback;
+    private final Table<String, NewRelicMetric, Boolean> enabledMetrics;
+    private final MetricAttributeFilter fallback;
 
     /**
-     * @param tableSupplier supplier of a table containing metrics config
-     * @param fallback      to be used when there metrics config has no entry for the metric to be reported. If null,
-     *                      AllDisabledMetricAttributeFilter will be used.
+     * @param table    table containing metrics config. Must be immutable or otherwise threadsafe.
+     * @param fallback to be used when there metrics config has no entry for the metric to be reported. If null,
+     *                 AllDisabledMetricAttributeFilter will be used.
      */
-    public TableMetricAttributeFilter(@Nonnull Supplier<Table<String, NewRelicMetric, Boolean>> tableSupplier,
+    public TableMetricAttributeFilter(@Nonnull Table<String, NewRelicMetric, Boolean> table,
             @Nullable MetricAttributeFilter fallback) {
-        Preconditions.checkArgument(tableSupplier != null, "tableSupplier cannot be null");
-        this.enabledMetrics = tableSupplier.get();
+        Preconditions.checkArgument(table != null, "table cannot be null");
+        this.enabledMetrics = table;
         this.fallback = getFallbackMetricFilter(fallback);
     }
 
