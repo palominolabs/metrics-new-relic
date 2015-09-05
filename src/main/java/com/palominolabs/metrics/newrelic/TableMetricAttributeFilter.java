@@ -9,7 +9,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Table;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -25,11 +24,12 @@ import javax.annotation.Nullable;
  *          .put("metricName2", NewRelicMetric.COUNTER_COUNT, true)
  *          .build();
  *
- *      new TableMetricAttributeFilter(new MetricAttributeTableSupplier(metricConfig), new AllDisabledMetricAttributeFilter());
+ *      new TableMetricAttributeFilter(new MetricAttributeTableSupplier(metricConfig), new
+ * AllDisabledMetricAttributeFilter());
  *     }
  * </pre>
- * Constructor receives a {@link MetricAttributeFilter} which will be used as fallback for all metrics not specified in configuration.
- * In case <i>fallback</i> is null, {@link AllDisabledMetricAttributeFilter} will be used.
+ * Constructor receives a {@link MetricAttributeFilter} which will be used as fallback for all metrics not specified in
+ * configuration. In case <i>fallback</i> is null, {@link AllDisabledMetricAttributeFilter} will be used.
  */
 public class TableMetricAttributeFilter implements MetricAttributeFilter {
 
@@ -38,22 +38,14 @@ public class TableMetricAttributeFilter implements MetricAttributeFilter {
 
     /**
      * @param tableSupplier supplier of a table containing metrics config
-     * @param fallback      to be used when there metrics config has no entry for the metric to be reported
+     * @param fallback      to be used when there metrics config has no entry for the metric to be reported. If null,
+     *                      AllDisabledMetricAttributeFilter will be used.
      */
-    public TableMetricAttributeFilter(@Nonnull Supplier<Table<String, NewRelicMetric, Boolean>> tableSupplier, @Nullable MetricAttributeFilter fallback) {
+    public TableMetricAttributeFilter(@Nonnull Supplier<Table<String, NewRelicMetric, Boolean>> tableSupplier,
+        @Nullable MetricAttributeFilter fallback) {
         Preconditions.checkArgument(tableSupplier != null, "tableSupplier cannot be null");
         this.enabledMetrics = tableSupplier.get();
         this.fallback = getFallbackMetricFilter(fallback);
-    }
-
-    private MetricAttributeFilter getFallbackMetricFilter(MetricAttributeFilter fallback) {
-        return fallback == null ?
-                new AllDisabledMetricAttributeFilter() :
-                fallback;
-    }
-
-    private boolean isEnabledWithFallback(final String name, NewRelicMetric newRelicMetric, Supplier<Boolean> fallbackSupplier) {
-        return Optional.fromNullable(enabledMetrics.get(name, newRelicMetric)).or(fallbackSupplier);
     }
 
     @Override
@@ -376,6 +368,17 @@ public class TableMetricAttributeFilter implements MetricAttributeFilter {
         });
     }
 
+    private MetricAttributeFilter getFallbackMetricFilter(MetricAttributeFilter fallback) {
+        return fallback == null ?
+            new AllDisabledMetricAttributeFilter() :
+            fallback;
+    }
+
+    private boolean isEnabledWithFallback(final String name, NewRelicMetric newRelicMetric,
+        Supplier<Boolean> fallbackSupplier) {
+        return Optional.fromNullable(enabledMetrics.get(name, newRelicMetric)).or(fallbackSupplier);
+    }
+
     public enum NewRelicMetric {
 
         TIMER_MIN,
@@ -412,5 +415,4 @@ public class TableMetricAttributeFilter implements MetricAttributeFilter {
         GAUGE_VALUE,
 
     }
-
 }
