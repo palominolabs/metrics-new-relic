@@ -14,8 +14,8 @@ subprojects { project ->
   apply plugin: 'com.jfrog.bintray'
 
   group = 'com.palominolabs.metrics'
-  version = '1.0.6-SNAPSHOT'
-  ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+  version = '1.1.0'
+  ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
   ext.deps = [jackson: '2.6.1',
               junit  : '4.12']
 
@@ -42,12 +42,13 @@ subprojects { project ->
   }
 
   project.bintray {
-    user = rootProject.hasProperty('bintrayUsername') ? rootProject.properties.bintrayUsername : 'FIXME'
-    key = rootProject.hasProperty('bintrayApiKey') ? rootProject.properties.bintrayApiKey : 'FIXME'
+    user = rootProject.hasProperty('bintrayUsername') ? rootProject.property('bintrayUsername') : 'FIXME'
+    key = rootProject.hasProperty('bintrayApiKey') ? rootProject.property('bintrayApiKey') : 'FIXME'
+    configurations = ['archives']
 
     pkg {
       repo = 'metrics-new-relic'
-      licenses = ['COIL']
+      licenses = ['WTFPL']
       vcsUrl = ['https://github.com/palominolabs/metrics-new-relic']
       name = project.name
 
