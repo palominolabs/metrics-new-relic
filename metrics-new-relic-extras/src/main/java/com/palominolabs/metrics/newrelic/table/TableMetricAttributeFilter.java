@@ -1,4 +1,4 @@
-package com.palominolabs.metrics.newrelic;
+package com.palominolabs.metrics.newrelic.table;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.Gauge;
@@ -9,6 +9,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Table;
+import com.palominolabs.metrics.newrelic.AllDisabledMetricAttributeFilter;
+import com.palominolabs.metrics.newrelic.MetricAttributeFilter;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -42,7 +44,7 @@ public class TableMetricAttributeFilter implements MetricAttributeFilter {
      *                      AllDisabledMetricAttributeFilter will be used.
      */
     public TableMetricAttributeFilter(@Nonnull Supplier<Table<String, NewRelicMetric, Boolean>> tableSupplier,
-        @Nullable MetricAttributeFilter fallback) {
+            @Nullable MetricAttributeFilter fallback) {
         Preconditions.checkArgument(tableSupplier != null, "tableSupplier cannot be null");
         this.enabledMetrics = tableSupplier.get();
         this.fallback = getFallbackMetricFilter(fallback);
@@ -370,12 +372,12 @@ public class TableMetricAttributeFilter implements MetricAttributeFilter {
 
     private MetricAttributeFilter getFallbackMetricFilter(MetricAttributeFilter fallback) {
         return fallback == null ?
-            new AllDisabledMetricAttributeFilter() :
-            fallback;
+                new AllDisabledMetricAttributeFilter() :
+                fallback;
     }
 
     private boolean isEnabledWithFallback(final String name, NewRelicMetric newRelicMetric,
-        Supplier<Boolean> fallbackSupplier) {
+            Supplier<Boolean> fallbackSupplier) {
         return Optional.fromNullable(enabledMetrics.get(name, newRelicMetric)).or(fallbackSupplier);
     }
 

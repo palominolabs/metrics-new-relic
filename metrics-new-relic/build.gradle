@@ -2,7 +2,6 @@ dependencies {
   compile 'io.dropwizard.metrics:metrics-core:3.1.0'
   compile 'com.newrelic.agent.java:newrelic-api:3.10.0'
   compile 'com.google.guava:guava:18.0'
-  compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.5.4'
   compile 'com.google.code.findbugs:jsr305:2.0.3'
   testCompile 'junit:junit:4.12'
 }

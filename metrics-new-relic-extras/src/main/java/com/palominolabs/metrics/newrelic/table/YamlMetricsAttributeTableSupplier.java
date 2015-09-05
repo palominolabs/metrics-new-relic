@@ -1,4 +1,4 @@
-package com.palominolabs.metrics.newrelic;
+package com.palominolabs.metrics.newrelic.table;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -7,14 +7,13 @@ import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
-import com.palominolabs.metrics.newrelic.TableMetricAttributeFilter.NewRelicMetric;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nonnull;
+import com.palominolabs.metrics.newrelic.table.TableMetricAttributeFilter.NewRelicMetric;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
+import javax.annotation.Nonnull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Supplier of a {@link Table} created by reading a yaml file defined as follows:
@@ -44,13 +43,12 @@ public class YamlMetricsAttributeTableSupplier implements Supplier<Table<String,
 
         try {
             Map<String, Map<NewRelicMetric, Boolean>> o = mapper
-                    .readValue(yamlSource.toURL(), new TypeReference<Map<String, Map<NewRelicMetric, Boolean>>>() {});
+                .readValue(yamlSource.toURL(), new TypeReference<Map<String, Map<NewRelicMetric, Boolean>>>() {});
             return table(o);
         } catch (IOException e) {
             LOG.error("Could not parse NewRelic metrics config file. Check expected format", e);
             throw new IllegalArgumentException("NewRelic metrics config file has wrong format", e);
         }
-
     }
 
     private static <R, C, V> Table<R, C, V> table(Map<R, Map<C, V>> fromTable) {

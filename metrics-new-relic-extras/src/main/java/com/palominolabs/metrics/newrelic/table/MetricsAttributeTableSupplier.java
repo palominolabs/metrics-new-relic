@@ -1,13 +1,13 @@
-package com.palominolabs.metrics.newrelic;
+package com.palominolabs.metrics.newrelic.table;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Table;
-
 import javax.annotation.Nonnull;
 
 /**
- * Supplier of a {@link Table} containing if a metrics attribute is enabled or disabled.<br>
+ * Supplier of a {@link Table} containing if a metrics attribute is enabled or disabled.
+ *
  * Table must be defined as follows:
  * <ul>
  * <li>Row key: metricName</li>

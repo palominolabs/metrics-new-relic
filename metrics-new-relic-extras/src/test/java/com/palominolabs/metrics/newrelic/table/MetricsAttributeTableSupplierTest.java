@@ -1,8 +1,8 @@
-package com.palominolabs.metrics.newrelic;
+package com.palominolabs.metrics.newrelic.table;
 
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Table;
-import com.palominolabs.metrics.newrelic.TableMetricAttributeFilter.NewRelicMetric;
+import com.palominolabs.metrics.newrelic.table.TableMetricAttributeFilter.NewRelicMetric;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -25,9 +25,8 @@ public class MetricsAttributeTableSupplierTest {
         MatcherAssert.assertThat(table, CoreMatchers.sameInstance(metricConfig));
     }
 
-
     @Test
-    public void nullTableThrowsException(){
+    public void nullTableThrowsException() {
         try {
             new MetricsAttributeTableSupplier(null);
             Assert.fail();
