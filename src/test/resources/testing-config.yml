@@ -1,0 +1,5 @@
+name1:
+  COUNTER_COUNT: true
+name2:
+  TIMER_MAX: true
+  TIMER_MIN: false
