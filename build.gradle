@@ -42,7 +42,7 @@ subprojects { project ->
   }
 
   project.bintray {
-    user = rootProject.hasProperty('bintrayUsername') ? rootProject.property('bintrayUsername') : 'FIXME'
+    user = rootProject.hasProperty('bintrayUser') ? rootProject.property('bintrayUser') : 'FIXME'
     key = rootProject.hasProperty('bintrayApiKey') ? rootProject.property('bintrayApiKey') : 'FIXME'
     configurations = ['archives']
 
