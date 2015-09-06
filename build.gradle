@@ -14,7 +14,7 @@ subprojects { project ->
   apply plugin: 'com.jfrog.bintray'
 
   group = 'com.palominolabs.metrics'
-  version = '1.1.1-SNAPSHOT'
+  version = '1.1.1'
   ext.isReleaseVersion = !version.endsWith('SNAPSHOT')
   ext.deps = [jackson: '2.6.1',
               junit  : '4.12']
@@ -47,10 +47,10 @@ subprojects { project ->
     configurations = ['archives']
 
     pkg {
-      repo = 'metrics-new-relic'
+      repo = 'maven'
       licenses = ['WTFPL']
       vcsUrl = 'https://github.com/palominolabs/metrics-new-relic'
-      name = project.name
+      name = 'metrics-new-relic'
 
       version {
         name = project.version
