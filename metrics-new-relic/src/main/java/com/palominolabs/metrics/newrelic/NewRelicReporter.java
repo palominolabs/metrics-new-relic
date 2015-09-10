@@ -10,6 +10,9 @@ import com.codahale.metrics.ScheduledReporter;
 import com.codahale.metrics.Snapshot;
 import com.codahale.metrics.Timer;
 import com.newrelic.api.agent.NewRelic;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.TimeUnit;
@@ -27,6 +30,8 @@ import javax.annotation.concurrent.ThreadSafe;
  */
 @ThreadSafe
 public final class NewRelicReporter extends ScheduledReporter {
+
+    private static final Logger logger = LoggerFactory.getLogger(NewRelicReporter.class);
 
     private final MetricAttributeFilter attributeFilter;
 
@@ -58,11 +63,17 @@ public final class NewRelicReporter extends ScheduledReporter {
         super(registry, name, filter, rateUnit, durationUnit);
         this.attributeFilter = attributeFilter;
         this.metricNamePrefix = metricNamePrefix;
+
+        logger.info("Initialized NewRelicReporter for registry with name '{}', filter of type '{}', attribute filter of type '{}', rate unit {} , duration unit {} and name prefix '{}'",
+                name, filter.getClass().getCanonicalName(), attributeFilter.getClass().getCanonicalName(), rateUnit.toString(), durationUnit.toString(), metricNamePrefix);
     }
 
     @Override
     public void report(SortedMap<String, Gauge> gauges, SortedMap<String, Counter> counters,
         SortedMap<String, Histogram> histograms, SortedMap<String, Meter> meters, SortedMap<String, Timer> timers) {
+        logger.debug("Received report of {} gauges, {} counters, {} histograms, {} meters and {} timers",
+                gauges.size(), counters.size(), histograms.size(), meters.size(), timers.size());
+
         for (Map.Entry<String, Gauge> gaugeEntry : gauges.entrySet()) {
             doGauge(gaugeEntry.getKey(), gaugeEntry.getValue());
         }
@@ -215,6 +226,7 @@ public final class NewRelicReporter extends ScheduledReporter {
     }
 
     private void record(String name, float value) {
+        logger.trace("Reporting metric Custom/{} with value {}", name, value);
         NewRelic.recordMetric("Custom/" + metricNamePrefix + name, value);
     }
 
