@@ -226,8 +226,9 @@ public final class NewRelicReporter extends ScheduledReporter {
     }
 
     private void record(String name, float value) {
-        logger.trace("Reporting metric Custom/{} with value {}", name, value);
-        NewRelic.recordMetric("Custom/" + metricNamePrefix + name, value);
+        String fullMetricName = "Custom/" + metricNamePrefix + name;
+        logger.trace("Reporting metric {} with value {}", fullMetricName, value);
+        NewRelic.recordMetric(fullMetricName, value);
     }
 
     public static final class Builder {
